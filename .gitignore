@@ -1,7 +1,12 @@
 # Virtualenv / Python bytecode
 .venv/
+.venv-build/
 __pycache__/
 *.py[cod]
+
+# PyInstaller build output
+build/
+dist/
 
 # Runtime state: auth token is a credential, data file holds your images
 # (use `git add -f <file>` if you really want to version your panel layout)

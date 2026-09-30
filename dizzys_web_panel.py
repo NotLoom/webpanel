@@ -9,6 +9,9 @@ Setup:
     pip install aiohttp
     python dizzys_web_panel.py
 
+Standalone executable:
+    ./build.sh   ->  dist/dizzys-web-panel
+
 In VTube Studio: Settings -> turn ON "Start API" (default port 8001).
 First run: VTube Studio shows a popup asking to allow "Dizzy's Web Panel" -> Allow.
 Then open the printed http://<your-pc-ip>:8080 link on your phone (same Wi-Fi).
@@ -19,12 +22,26 @@ import asyncio
 import json
 import os
 import socket
+import sys
 import uuid
 from pathlib import Path
 
-from aiohttp import ClientSession, WSMsgType, web
+from aiohttp import ClientSession, ClientWSTimeout, WSMsgType, web
 
-BASE = Path(__file__).resolve().parent
+
+def app_dir() -> Path:
+    """Folder that stores the data files.
+
+    Running from source this is the script's folder; running as a frozen
+    executable (PyInstaller) it is the folder the executable lives in, so
+    buttons and the auth token survive restarts and temp-dir cleanup.
+    """
+    if getattr(sys, "frozen", False):
+        return Path(sys.executable).resolve().parent
+    return Path(__file__).resolve().parent
+
+
+BASE = app_dir()
 DATA_FILE = BASE / "dizzys_panel_data.json"
 TOKEN_FILE = BASE / "dizzys_panel_token.txt"
 PLUGIN_NAME = "Dizzy's Web Panel"
@@ -79,7 +96,9 @@ class VTS:
     async def _connect(self):
         await self._close()
         self.session = ClientSession()
-        self.ws = await self.session.ws_connect(self.url, heartbeat=20, timeout=5)
+        self.ws = await self.session.ws_connect(
+            self.url, heartbeat=20, timeout=ClientWSTimeout(ws_close=5)
+        )
 
         if not self.token:
             r = await self._send(
@@ -247,7 +266,8 @@ def main():
 
     print(f"\n  {PLUGIN_NAME}")
     print(f"  On this PC : http://localhost:{args.port}")
-    print(f"  On phone   : http://{lan_ip()}:{args.port}   (same Wi-Fi)\n")
+    print(f"  On phone   : http://{lan_ip()}:{args.port}   (same Wi-Fi)")
+    print(f"  Data files : {BASE}\n")
     web.run_app(app, host=args.host, port=args.port, print=None)
 
 

@@ -3,7 +3,28 @@
 Phone-friendly, dark Material-style control panel for VTube Studio.
 Make buttons with your own text + image; tap one on your phone and VTube Studio fires that hotkey.
 
-## One-time setup
+## Standalone executable (no Python needed)
+
+Grab a prebuilt binary from the [Releases page](https://github.com/NotLoom/webpanel/releases)
+(Linux, Windows and macOS builds are produced automatically for every `v*` tag),
+or build one yourself:
+
+```bash
+./build.sh                 # -> dist/dizzys-web-panel
+```
+
+Run the binary exactly like the script; all options below work the same:
+
+```bash
+./dist/dizzys-web-panel --port 9000
+```
+
+`dizzys_panel_data.json` and `dizzys_panel_token.txt` are written next to the executable,
+so keep it in its own folder (e.g. move it out of your Downloads folder first).
+
+## Run from source
+
+### One-time setup
 
 ```bash
 python3 -m venv .venv
@@ -12,7 +33,7 @@ python3 -m venv .venv
 
 The only dependency is `aiohttp` (Python 3.10+; tested on 3.14).
 
-## Run
+### Run
 
 ```bash
 ./run.sh                             # http://<your-pc-ip>:8080
@@ -42,4 +63,12 @@ Both are git-ignored (the token is a credential).
 ## Notes
 
 The server has no authentication and listens on all interfaces by default (0.0.0.0), so anyone on your
-Wi-Fi can press buttons and change the layout. Use `./run.sh --host 127.0.0.1` if you don't want that.
+Wi-Fi can press buttons and change the layout. Use `./run.sh --host 127.0.0.1` (or
+`dizzys-web-panel --host 127.0.0.1`) if you don't want that.
+
+Downloaded macOS builds are unsigned, so Gatekeeper may block the first launch. Right-click the binary
+and choose **Open**, or clear the flag with
+`xattr -d com.apple.quarantine dizzys-web-panel-macos-arm64`.
+
+Prebuilt binaries come from [`.github/workflows/build.yml`](.github/workflows/build.yml), which runs
+PyInstaller on Linux, Windows and macOS and attaches the results to the GitHub release on every tag.
